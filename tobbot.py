@@ -22,7 +22,7 @@ mouse_gang = toby_emoji + ryan_emoji + minson_emoji
 async def on_ready():
     """Runs everytime the bot starts"""
     print(f'We have logged in as {tobbot.user}')
-    tobbot.annoy = True # default
+    tobbot.yap = True # default
     await tobbot.change_presence(activity=discord.Game('does not do much, is just cute :)'))
 
 @tobbot.event
@@ -49,10 +49,10 @@ async def on_message(msg):
         await msg.reply(":rat::rat::rat:")
 
     if "ray" in msg.content.lower():
-        if tobbot.annoy == True:
+        if tobbot.yap == True:
             ray_rat = msg.content.replace("ray", "***rat***")
             await msg.reply(f"*did you mean,* '{ray_rat}'?")
-        elif tobbot.annoy == False:
+        elif tobbot.yap == False:
             pass
 
     # after processing all the text in our custom way above...
@@ -83,7 +83,7 @@ async def toby_mention(msg):
 
 @tobbot.command(aliases=['tobbot'])
 async def toby(ctx, arg1=None, arg2=None, arg3=None):
-    await ctx.reply(f"{toby_emoji} squeak {ctx.author.mention}! squeak squeak squeak. squeak. {ryan_emoji}")
+    await ctx.reply("use rodent vocabulary wisely. <:rat_tu_y:1214342472751259728>")
 
 @tobbot.command()
 async def invite(ctx):
@@ -92,12 +92,12 @@ async def invite(ctx):
     await ctx.reply(invite)
 
 @tobbot.command()
-async def annoy(ctx):
+async def yap(ctx):
     """toggle the ray-rat switch"""
-    tobbot.annoy = not tobbot.annoy
-    if tobbot.annoy == True:
+    tobbot.yap = not tobbot.yap
+    if tobbot.yap == True:
         await ctx.reply("Prepare for trouble and make it double.")
-    elif tobbot.annoy == False:
+    elif tobbot.yap == False:
         await ctx.reply("sad mouse noises.")
 
 @tobbot.command()
