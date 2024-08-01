@@ -20,7 +20,10 @@ mouse_gang = toby_emoji + ryan_emoji + minson_emoji
 
 @tobbot.event
 async def on_ready():
+    """Runs everytime the bot starts"""
     print(f'We have logged in as {tobbot.user}')
+    tobbot.annoy = True # default
+    await tobbot.change_presence(activity=discord.Game('does not do much, is just cute :)'))
 
 @tobbot.event
 async def on_message(msg):
@@ -44,6 +47,13 @@ async def on_message(msg):
 
     if "rodent" in msg.content.lower():
         await msg.reply(":rat::rat::rat:")
+
+    if "ray" in msg.content.lower():
+        if tobbot.annoy == True:
+            ray_rat = msg.content.replace("ray", "***rat***")
+            await msg.reply(f"*did you mean,* '{ray_rat}'?")
+        elif tobbot.annoy == False:
+            pass
 
     # after processing all the text in our custom way above...
     # process bot commands (messages starting with ".")
@@ -80,6 +90,22 @@ async def invite(ctx):
     invite = ("https://discord.com/oauth2/authorize?client_id=1268249395304861717&"
               "scope=bot+applications.commands&permissions=412317240384")
     await ctx.reply(invite)
+
+@tobbot.command()
+async def annoy(ctx):
+    """toggle the ray-rat switch"""
+    tobbot.annoy = not tobbot.annoy
+    if tobbot.annoy == True:
+        await ctx.reply("Prepare for trouble and make it double.")
+    elif tobbot.annoy == False:
+        await ctx.reply("sad mouse noises.")
+
+@tobbot.command()
+async def vibe(ctx):
+    """vibe check"""
+    await ctx.reply(random.choice(["大吉: mouse vibrates excitedly <:rat_tu_y:1214342472751259728>",
+                                   "大凶: mouse shakes in terror <a:mouseShake:1199964736234721280>",
+                                   "末吉: mouse blinks in boredom <:bruh:1200584402271477842>"]))
 
 # read api key from file called "api_key.txt"
 with open("api_key.txt", "r") as f:
