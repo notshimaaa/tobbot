@@ -1,6 +1,7 @@
 import json
 import os
 import random
+import re
 
 import discord
 from discord.ext import commands
@@ -17,17 +18,25 @@ ryan_emoji = "<:ryan:1200594423172583475>"
 minson_emoji = "<:manmaru:1202815295434006648>"
 mouse_gang = toby_emoji + ryan_emoji + minson_emoji
 
+# ####################################
+# ~~~~~~~~~ EVENTS ~~~~~~~~~~~~~~~~~~~
+# ####################################
 
 @tobbot.event
 async def on_ready():
     """Runs everytime the bot starts"""
     print(f'We have logged in as {tobbot.user}')
     tobbot.yap = True # default
+    tobbot.cage = False # default
     await tobbot.change_presence(activity=discord.Game('does not do much, is just cute :)'))
 
 @tobbot.event
 async def on_message(msg):
     if msg.author == tobbot.user:
+        return
+
+    if tobbot.cage == True:
+        await tobbot.process_commands(msg)
         return
 
     if "toby" in msg.content.lower():
@@ -42,6 +51,11 @@ async def on_message(msg):
             for _ in range(rat_count):
                 await rat_fact(msg)
 
+    # alternatives to the black magic below:
+    # >>> if "mouse" in msg.content.lower() or "mice" in msg.content.lower():
+    # or:
+    # >>> for word in ("mouse", "mice"):
+    # >>>     if word in msg.content.lower():
     if any(word in msg.content.lower() for word in ("mouse", "mice")):
         await mouse_fact(msg)
 
@@ -50,7 +64,7 @@ async def on_message(msg):
 
     if "ray" in msg.content.lower():
         if tobbot.yap == True:
-            ray_rat = msg.content.replace("ray", "***rat***")
+            ray_rat = re.sub("[Rr][Aa][Yy]", "***rat***", msg.content)
             await msg.reply(f"*did you mean,* '{ray_rat}'?")
         elif tobbot.yap == False:
             pass
@@ -63,6 +77,13 @@ async def rat_fact(msg):
     # facts from https://github.com/RileyAbr/rat-facts-Discord-Bot/tree/main
     # import rat facts from json file in utf-8 format
     rat_facts = "./data/rat_facts.json"
+
+    # to open a file (the old way!!)
+    # file = open(rat_facts, "r", encoding="utf-8")
+    # rat_facts = json.load(file)
+    # file.close()
+
+    # file open and close automatically
     with open(rat_facts, "r", encoding="utf-8") as file:
         rat_facts = json.load(file)
 
@@ -81,24 +102,55 @@ async def toby_mention(msg):
     # send the image
     await msg.reply(file=discord.File(f"{toby_photos_dir}/{toby_photo}"))
 
-@tobbot.command(aliases=['tobbot'])
-async def toby(ctx, arg1=None, arg2=None, arg3=None):
-    await ctx.reply("use rodent vocabulary wisely. <:rat_tu_y:1214342472751259728>")
+# ####################################
+# ~~~~~~~ COMMANDS ~~~~~~~~~~~~~~~~~~~
+# ####################################
+
+@tobbot.command(aliases=['tobbot', 'tob','tobe'])
+async def toby(ctx):
+    await ctx.reply("use rodent-related words wisely. <:rat_tu_y:1214342472751259728>")
 
 @tobbot.command()
 async def invite(ctx):
     invite = ("https://discord.com/oauth2/authorize?client_id=1268249395304861717&"
               "scope=bot+applications.commands&permissions=412317240384")
-    await ctx.reply(invite)
+    await ctx.reply(f"here you go - {invite}")
 
 @tobbot.command()
 async def yap(ctx):
-    """toggle the ray-rat switch"""
+    """toggle the autocorrect switch"""
     tobbot.yap = not tobbot.yap
     if tobbot.yap == True:
         await ctx.reply("Prepare for trouble and make it double.")
     elif tobbot.yap == False:
         await ctx.reply("sad mouse noises.")
+
+@tobbot.command()
+async def yapstat(ctx):
+    """status update of the goofy spelling autocorrect"""
+    if tobbot.yap == True:
+        await ctx.reply("autocorrect is currently on.")
+    elif tobbot.yap == False:
+        await ctx.reply("autocorrect is currently off.")
+
+@tobbot.command()
+async def cage(ctx):
+    """toggle the cage switch"""
+    # tobbot.cage = not tobbot.cage
+    if tobbot.cage == True:
+        tobbot.cage = False # let the mouse out
+        await ctx.reply("here he comes. :)")
+    elif tobbot.cage == False:
+        tobbot.cage = True # put the mouse back in the cage
+        await ctx.reply("there he goes. :(")
+
+@tobbot.command()
+async def cagestat(ctx):
+    """status update of the goofy spelling autocorrect"""
+    if tobbot.cage == True:
+        await ctx.reply("shhh, he is currently sleeping. do you wish to wake him up?")
+    elif tobbot.cage == False:
+        await ctx.reply("he is on the loose. he is among us.")
 
 @tobbot.command()
 async def vibe(ctx):
