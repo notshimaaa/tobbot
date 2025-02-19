@@ -35,6 +35,9 @@ async def on_message(msg):
     if msg.author == tobbot.user:
         return
 
+    if msg.author.bot:
+        return  # don't respond to bot messages
+
     if tobbot.cage == True:
         await tobbot.process_commands(msg)
         return
