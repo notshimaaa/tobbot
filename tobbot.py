@@ -49,21 +49,22 @@ async def on_message(msg):
     if msg.author == tobbot.user:
         return
 
-    # if tobbot.cage == True:
-    #     await tobbot.process_commands(msg)
-    #     return
-    #
-    # if "toby" in msg.content.lower():
-    #     if msg.content.lower() != ".toby":
-    #         await toby_mention(msg)
-    #
-    # if "rat" in msg.content.lower():
-    #     rat_count = msg.content.lower().count("rat")
-    #     if rat_count > 10:
-    #         await msg.reply("😡😡😡That's a lot of rats.😡😡😡")
-    #     else:
-    #         for _ in range(rat_count):
-    #             await rat_fact(msg)
+    this_guilds_cage = tobbot.cage_gang[msg.guild.id]
+    if this_guilds_cage == True:
+        await tobbot.process_commands(msg)
+        return
+
+    if "toby" in msg.content.lower():
+        if msg.content.lower() != ".toby":
+            await toby_mention(msg)
+
+    if "rat" in msg.content.lower():
+        rat_count = msg.content.lower().count("rat")
+        if rat_count > 10:
+            await msg.reply("😡😡😡That's a lot of rats.😡😡😡")
+        else:
+            for _ in range(rat_count):
+                await rat_fact(msg)
 
     # alternatives to the black magic below:
     # >>> if "mouse" in msg.content.lower() or "mice" in msg.content.lower():
@@ -77,15 +78,25 @@ async def on_message(msg):
         await msg.reply(":rat::rat::rat:")
 
     if "ray" in msg.content.lower():
-        if tobbot.yap == True:
+        this_guilds_yap = tobbot.yap_gang[msg.guild.id]
+        if this_guilds_yap == True:
             ray_rat = re.sub("[Rr][Aa][Yy]", "***rat***", msg.content)
             await msg.reply(f"*did you mean,* '{ray_rat}'?")
-        elif tobbot.yap == False:
+        elif this_guilds_yap == False:
             pass
 
     # after processing all the text in our custom way above...
     # process bot commands (messages starting with ".")
     await tobbot.process_commands(msg)
+    
+@tobbot.event
+async def on_guild_join(guild):
+    """
+    Runs when the bot joins a new server. Sets the default values for the
+    yap and cage switches to True and False respectively.
+    """
+    tobbot.yap_gang[guild.id] = True
+    tobbot.cage_gang[guild.id] = False
     
 # ####################################
 # ~~~~~~~ HELPER FUNCTIONS ~~~~~~~~~~~
