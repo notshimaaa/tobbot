@@ -26,8 +26,22 @@ mouse_gang = toby_emoji + ryan_emoji + minson_emoji
 async def on_ready():
     """Runs everytime the bot starts"""
     print(f'We have logged in as {tobbot.user}')
-    tobbot.yap = True # default
-    tobbot.cage = False # default
+    
+    # tobbot.yap = True # default
+    # tobbot.cage = False # default
+    
+    # the gang = {} # it's supposed to look like gang1: T, gang2: F, gang3: T
+    # for (all of the servers tobbot is in):
+    # append them to the gang dict, automatically assigning them to True
+    #
+    tobbot.yap_gang = {}  # this is a dictionary that will hold the yap status of different servers
+    tobbot.cage_gang = {}  # this is a dictionary that will hold the cage status of different servers
+    for guild in tobbot.guilds:
+        print(guild.name, guild.id)
+        tobbot.yap_gang[guild.id] = True
+        tobbot.cage_gang[guild.id] = False
+    print(tobbot.yap_gang)
+    print(tobbot.cage_gang)
     await tobbot.change_presence(activity=discord.Game('does not do much, is just cute :)'))
 
 @tobbot.event
@@ -35,21 +49,21 @@ async def on_message(msg):
     if msg.author == tobbot.user:
         return
 
-    if tobbot.cage == True:
-        await tobbot.process_commands(msg)
-        return
-
-    if "toby" in msg.content.lower():
-        if msg.content.lower() != ".toby":
-            await toby_mention(msg)
-
-    if "rat" in msg.content.lower():
-        rat_count = msg.content.lower().count("rat")
-        if rat_count > 10:
-            await msg.reply("😡😡😡That's a lot of rats.😡😡😡")
-        else:
-            for _ in range(rat_count):
-                await rat_fact(msg)
+    # if tobbot.cage == True:
+    #     await tobbot.process_commands(msg)
+    #     return
+    #
+    # if "toby" in msg.content.lower():
+    #     if msg.content.lower() != ".toby":
+    #         await toby_mention(msg)
+    #
+    # if "rat" in msg.content.lower():
+    #     rat_count = msg.content.lower().count("rat")
+    #     if rat_count > 10:
+    #         await msg.reply("😡😡😡That's a lot of rats.😡😡😡")
+    #     else:
+    #         for _ in range(rat_count):
+    #             await rat_fact(msg)
 
     # alternatives to the black magic below:
     # >>> if "mouse" in msg.content.lower() or "mice" in msg.content.lower():
@@ -72,6 +86,10 @@ async def on_message(msg):
     # after processing all the text in our custom way above...
     # process bot commands (messages starting with ".")
     await tobbot.process_commands(msg)
+    
+# ####################################
+# ~~~~~~~ HELPER FUNCTIONS ~~~~~~~~~~~
+# ####################################
 
 async def rat_fact(msg):
     # facts from https://github.com/RileyAbr/rat-facts-Discord-Bot/tree/main
@@ -119,37 +137,45 @@ async def invite(ctx):
 @tobbot.command()
 async def yap(ctx):
     """toggle the autocorrect switch"""
-    tobbot.yap = not tobbot.yap
-    if tobbot.yap == True:
+    # get the server id from "ctx.guild.id"
+    # ctx.guild = the guild that the command was sent in
+    # ctx.guild.id = the id of the guild that the command was sent in
+
+    tobbot.yap_gang[ctx.guild.id] = not tobbot.yap_gang[ctx.guild.id]
+
+    # tobbot.yap = not tobbot.yap
+    # we have tobbot.yap_gang to keep track of the yap status of different servers
+    if tobbot.yap_gang[ctx.guild.id] == True:
         await ctx.reply("Prepare for trouble and make it double.")
-    elif tobbot.yap == False:
+    elif tobbot.yap_gang[ctx.guild.id] == False:
         await ctx.reply("sad mouse noises.")
 
 @tobbot.command()
 async def yapstat(ctx):
     """status update of the goofy spelling autocorrect"""
-    if tobbot.yap == True:
+    yap = tobbot.yap_gang[ctx.guild.id]
+    if yap == True:
         await ctx.reply("autocorrect is currently on.")
-    elif tobbot.yap == False:
+    elif yap == False:
         await ctx.reply("autocorrect is currently off.")
+    print(ctx.guild.id, yap, tobbot.yap_gang)
 
 @tobbot.command()
 async def cage(ctx):
     """toggle the cage switch"""
-    # tobbot.cage = not tobbot.cage
-    if tobbot.cage == True:
-        tobbot.cage = False # let the mouse out
+    tobbot.cage_gang[ctx.guild.id] = not tobbot.cage_gang[ctx.guild.id]
+    if tobbot.cage_gang[ctx.guild.id] == True:
         await ctx.reply("here he comes. :)")
-    elif tobbot.cage == False:
-        tobbot.cage = True # put the mouse back in the cage
+    elif tobbot.cage_gang[ctx.guild.id] == True:
         await ctx.reply("there he goes. :(")
 
 @tobbot.command()
 async def cagestat(ctx):
-    """status update of the goofy spelling autocorrect"""
-    if tobbot.cage == True:
+    """is the mouse in the cage or not"""
+    cage = tobbot.cage_gang[ctx.guild.id]
+    if cage == True:
         await ctx.reply("shhh, he is currently sleeping. do you wish to wake him up?")
-    elif tobbot.cage == False:
+    elif cage == False:
         await ctx.reply("he is on the loose. he is among us.")
 
 @tobbot.command()
