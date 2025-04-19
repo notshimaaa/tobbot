@@ -49,6 +49,9 @@ async def on_message(msg):
     if msg.author == tobbot.user:
         return
 
+    if msg.author.bot:
+        return  # don't respond to bot messages
+
     this_guilds_cage = tobbot.cage_gang[msg.guild.id]
     if this_guilds_cage == True:
         await tobbot.process_commands(msg)
